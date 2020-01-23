@@ -9,8 +9,7 @@ flask
 ...
 
 ## run
-$ export FLASK_APP=predict_app.py  
-$ flask run --host=127.0.0.1
+![screen-capture](https://user-images.githubusercontent.com/33386742/72966157-8413c900-3e01-11ea-9574-781d907eb3cf.gif)
+
 
 ## result
-![image](https://user-images.githubusercontent.com/33386742/72965042-b3750680-3dfe-11ea-92c7-ffb07f8f0436.png)
