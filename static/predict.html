@@ -2,6 +2,7 @@
 <html>
     <head>
         <meta charset="utf-8"/>
+        <!-- <link rel="stylesheet" href="css/style.css" type="text/css"> -->
         <title>predict image on web</title>        
         <style type="text/css">
             #main{
@@ -180,7 +181,7 @@
                     prob_array[6] = response.prediction.surprised.toFixed(4);
 
                     var max_index = 0;
-                    for(var i=1; i<(prob_array.length)-1; i++){
+                    for(var i=1; i<(prob_array.length); i++){
                         if(prob_array[i] > prob_array[max_index]){
                             max_index = i;
                         }
