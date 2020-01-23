@@ -1,44 +1,9 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>predict image on web</title>
-        <style type="text/css"> 
-            #main{font-size: 30px;
-            text-align: center;}
-
-            #preds{font-size: 20px;}
-            #button_area{margin-bottom: 50px;}
-
-            #emotion-prob{font-size: 15px;}
-
-            #div1{
-                float: left;
-                width:90%;
-                height:90%;
-                margin-bottom: 100px;
-                /* display:inline; */
-                }
-            
-            #table_img{
-                float: left;
-                margin-right: 5%;
-                width: 400px;
-                text-align: center;
-            }      
-
-            #table_emotion{
-                width: 300px;
-                float: left;
-                margin-right: 5%;
-                /* display: inline-table; */
-            }            
-
-            #myChart{
-                float: left;                
-            }
-
-                      
-        </style>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="css/style.css" type="text/css">
+        <title>predict image on web</title>        
     </head>
 
     <body>
@@ -282,15 +247,8 @@
                         $("#grad-cam-image").css({'height': '200px', 'width':'150px'});
                     }
                     
-                    // $("#grad-cam-image").attr("width", "150");
-
-                    
-                    
+                    // $("#grad-cam-image").attr("width", "150");                    
                 });
-
-               
-
-
             });
             
         </script>
