@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>predict image on web</title>
+        <style type="text/css"> 
+            #main{font-size: 30px;
+            text-align: center;}
+
+            #preds{font-size: 20px;}
+            #button_area{margin-bottom: 50px;}
+
+            #emotion-prob{font-size: 15px;}
+
+            #div1{
+                float: left;
+                width:90%;
+                height:90%;
+                margin-bottom: 100px;
+                /* display:inline; */
+                }
+            
+            #table_img{
+                float: left;
+                margin-right: 5%;
+                width: 400px;
+                text-align: center;
+            }      
+
+            #table_emotion{
+                width: 300px;
+                float: left;
+                margin-right: 5%;
+                /* display: inline-table; */
+            }            
+
+            #myChart{
+                float: left;                
+            }
+
+                      
+        </style>
+    </head>
+
+    <body>
+        <div id="main">
+            <p>                
+                Emotion Recognition           
+            </p>
+        </div>
+
+        <div id="button_area">
+            <input id="image-selector" type="file"/>
+            <button id="predict-button">Predict</button>
+        </div>
+        
+        <div id="div1">
+            <table id="table_img">
+                    <th>Input Image</th>
+                    <th>Grad-CAM result</th>
+                    <tr>
+                        <td><img id="selected-image" src=""/></td>
+                        <td><img id="grad-cam-image" src=""/></td>
+                    </tr>
+            </table>
+
+            <table id="table_emotion">
+                <th>Class</th>
+                <th>Probability</th>
+
+                <tr>
+                    <td>Angry</td>
+                    <td id="angry-prediction" align="center"></td>
+                </tr>
+
+                <tr>
+                    <td>Disgusted</td>
+                    <td id="disgusted-prediction" align="center"></td>
+                </tr>
+
+                <tr>
+                    <td>Fearful</td>
+                    <td id="fearful-prediction" align="center"></td>
+                </tr>
+
+                <tr>
+                    <td>Happy</td>
+                    <td id="happy-prediction" align="center"></td>
+                </tr>
+
+                <tr>
+                    <td>Neutral</td>
+                    <td id="neutral-prediction" align="center"></td>
+                </tr>
+
+                <tr>
+                    <td>Sad</td>
+                    <td id="sad-prediction" align="center"></td>
+                </tr>
+
+                <tr>
+                    <td>Surprised</td>
+                    <td id="surprised-prediction" align="center"></td>
+                </tr>
+            </table>
+
+            <canvas id="myChart"></canvas>     
+            
+            
+
+            
+        </div>
+
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+        <script>
+            
+            var ctx = document.getElementById('myChart');
+            ctx.height = 250;
+            var myChart = new Chart(ctx, "");
+            let base64Image;
+
+            $("#image-selector").change(function() {
+                let reader = new FileReader();
+                reader.onload = function(e){
+                    let dataURL = reader.result;
+                    $("#selected-image").attr("src", dataURL);                    
+
+                    var imgURL = (dataURL.split(";"))[0];                       
+                    var extension = (imgURL.split("/"))[1]; 
+                    
+                    base64Image = dataURL.replace("data:image/"+extension+";base64,","");
+
+                    $("#selected-image").attr("height", "200");
+                    $("#selected-image").attr("width", "150");                    
+                    $("#grad-cam-image").css({'height': '0px', 'width':'0px'});    
+
+                    
+                    myChart.destroy();
+
+                    // $("#myChart").css({'height': '0px', 'width':'0px'});
+
+                    // base64Image =dataURL.replace(/^data:image\/(png|jpg);base64,/, "");
+                }
+                reader.readAsDataURL($("#image-selector")[0].files[0]);
+
+                $("#angry-prediction").text("");
+                $("#disgusted-prediction").text("");
+                $("#fearful-prediction").text("");
+                $("#happy-prediction").text("");
+                $("#neutral-prediction").text("");
+                $("#sad-prediction").text("");
+                $("#surprised-prediction").text("");
+            });
+
+            $("#predict-button").click(function(event){
+                let message = {
+                    image: base64Image
+                }
+                console.log(message);
+                $.post("http://127.0.0.1:5000/predict", JSON.stringify(message), function(response){
+                    
+                    var prob_array = new Array();
+                    prob_array[0] = response.prediction.angry.toFixed(4);
+                    prob_array[1] = response.prediction.disgusted.toFixed(4);
+                    prob_array[2] = response.prediction.fearful.toFixed(4);
+                    prob_array[3] = response.prediction.happy.toFixed(4);
+                    prob_array[4] = response.prediction.neutral.toFixed(4);
+                    prob_array[5] = response.prediction.sad.toFixed(4);
+                    prob_array[6] = response.prediction.surprised.toFixed(4);
+
+                    var max_index = 0;
+                    for(var i=1; i<(prob_array.length)-1; i++){
+                        if(prob_array[i] > prob_array[max_index]){
+                            max_index = i;
+                        }
+                    }
+                    console.log(max_index);
+
+                    $("#angry-prediction").text(prob_array[0]);
+                    $("#disgusted-prediction").text(prob_array[1]);
+                    $("#fearful-prediction").text(prob_array[2]);
+                    $("#happy-prediction").text(prob_array[3]);
+                    $("#neutral-prediction").text(prob_array[4]);
+                    $("#sad-prediction").text(prob_array[5]);
+                    $("#surprised-prediction").text(prob_array[6]);
+
+                    $("#angry-prediction").css("color", "black");
+                    $("#disgusted-prediction").css("color", "black");
+                    $("#fearful-prediction").css("color", "black");
+                    $("#happy-prediction").css("color", "black");
+                    $("#neutral-prediction").css("color", "black");
+                    $("#sad-prediction").css("color", "black");
+                    $("#surprised-prediction").css("color", "black");
+                    
+                    if(max_index == 0){
+                        $("#angry-prediction").css("color", "red");
+                    }                        
+                    else if(max_index == 1){
+                        $("#disgusted-prediction").css("color", "red");
+                    }
+                    else if(max_index == 2){
+                        $("#fearful-prediction").css("color", "red");
+                    }
+                    else if(max_index == 3){
+                        $("#happy-prediction").css("color", "red");
+                    }
+                    else if(max_index == 4){
+                        $("#neutral-prediction").css("color", "red");
+                    }
+                    else if(max_index == 5){
+                        $("#sad-prediction").css("color", "red");
+                    }
+                    else if(max_index == 6){
+                        $("#surprised-prediction").css("color", "red");
+                    }
+                          
+                    
+
+
+                          
+                    
+                    myChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Angry', 'Disgusted', 'Fearful', 'Happy', 'Neutral', 'Sad', 'Surprised'],
+                            datasets: [{
+                                label: 'Emotion Chart',
+                                data: [prob_array[0],
+                                        prob_array[1],
+                                        prob_array[2],
+                                        prob_array[3],
+                                        prob_array[4],
+                                        prob_array[5],
+                                        prob_array[6] ],
+                                backgroundColor: [
+                                        'rgba(255, 99, 132, 0.2)',
+                                        'rgba(54, 162, 235, 0.2)',
+                                        'rgba(255, 206, 86, 0.2)',
+                                        'rgba(75, 192, 192, 0.2)',
+                                        'rgba(153, 102, 255, 0.2)',
+                                        'rgba(255, 159, 64, 0.2)',
+                                        'rgba(225, 19, 124, 0.2)'
+                                ],
+                                borderColor: [
+                                        'rgba(255, 99, 132, 1)',
+                                        'rgba(54, 162, 235, 1)',
+                                        'rgba(255, 206, 86, 1)',
+                                        'rgba(75, 192, 192, 1)',
+                                        'rgba(153, 102, 255, 1)',
+                                        'rgba(255, 159, 64, 1)',
+                                        'rgba(225, 19, 124, 1)'
+                                    ],
+                                borderWidth:1
+                            }]
+                        },
+                        options:{
+                            maintainAspectRatio: true,
+                            responsive: false,
+                            scales:{
+                                yAxes: [{
+                                    ticks: {
+                                        min: 0,
+                                        max: 1.0,
+                                        stepSize: 0.2,                                        
+                                        beginAtZero: true
+                                    }
+                                }]
+                            }
+                        }
+                    });
+                    
+                    
+
+                             
+
+                    var test = response.grad_cam_image;
+                    test = test.split("'");
+                    
+                    $("#grad-cam-image").attr("src", "data:image/png;base64," + test[1])
+                    if ($("#grad-cam-image", this).attr("src") != ""){
+                        $("#grad-cam-image").css({'height': '200px', 'width':'150px'});
+                    }
+                    
+                    // $("#grad-cam-image").attr("width", "150");
+
+                    
+                    
+                });
+
+               
+
+
+            });
+            
+        </script>
+    </body>
+
+</html>
