@@ -1,4 +1,4 @@
-# deploy-emotion-recognition-model-on-web
+# run-emotion-recognition-model-on-web
 load deep learning model and display its result on web
 
 
